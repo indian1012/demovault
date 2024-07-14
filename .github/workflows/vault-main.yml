@@ -32,13 +32,20 @@ jobs:
         echo "AWS_SECRET_ACCESS_KEY=${SECRET_KEY}" >> $GITHUB_ENV
 
     - name: Configure AWS credentials
-      run: |
+      run: 
+        mkdir -p ~/.aws|
         echo "[default]" > ~/.aws/credentials
-        echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-        echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        echo "aws_access_key_id=${ACCESS_KEY}" >> ~/.aws/credentials
+        echo "aws_secret_access_key=${SECRET_KEY}" >> ~/.aws/credentials
+
+   
 
     - name: Log in to Amazon ECR
-      run: aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 471112663300.dkr.ecr.ap-south-1.amazonaws.com
+        
+      run: |
+        aws --version  # Check AWS CLI version for debugging
+
+           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 471112663300.dkr.ecr.ap-south-1.amazonaws.com
 
     - name: Build and push Docker image
       run: |
