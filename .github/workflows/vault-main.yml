@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Vault
+      run: |
+        curl --request POST --data '{"token": "${{ secrets.VAULT_TOKEN }}"}' ${VAULT_ADDR}/v1/auth/github/login | jq -r ".auth.client_token" > token
+      env:
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+
+    - name: Get AWS Credentials
+      run: |
+        VAULT_TOKEN=$(cat token)
+        curl --header "X-Vault-Token: $VAULT_TOKEN" ${VAULT_ADDR}/v1/aws/creds/my-role | jq -r ".data.access_key, .data.secret_key" > creds
+        ACCESS_KEY=$(sed -n '1p' creds)
+        SECRET_KEY=$(sed -n '2p' creds)
+        echo "AWS_ACCESS_KEY_ID=${ACCESS_KEY}" >> $GITHUB_ENV
+        echo "AWS_SECRET_ACCESS_KEY=${SECRET_KEY}" >> $GITHUB_ENV
+
+    - name: Configure AWS credentials
+      run: |
+        echo "[default]" > ~/.aws/credentials
+        echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+        echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+
+    - name: Log in to Amazon ECR
+      run: aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 471112663300.dkr.ecr.ap-south-1.amazonaws.com
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t first-docker-image:latest .
+        aws ecr create-repository --repository-name first-docker-image --region ap-south-1
+        docker tag first-docker-image:latest 471112663300.dkr.ecr.ap-south-1.amazonaws.com/first-docker-image:latest
+        docker push 471112663300.dkr.ecr.ap-south-1.amazonaws.com/first-docker-image:latest
