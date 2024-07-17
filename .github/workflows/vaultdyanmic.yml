@@ -25,7 +25,7 @@ jobs:
         VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       run: |
-        VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="github" jwt="$GITHUB_TOKEN")
+        VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="github" jwt="$GIT_TOKEN")
         echo "::set-output name=vault_token::$VAULT_LOGIN"
 
     - name: Retrieve secret from Vault
