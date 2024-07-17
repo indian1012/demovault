@@ -31,14 +31,14 @@ jobs:
         echo "AWS_ACCESS_KEY_ID=${ACCESS_KEY}" >> $GITHUB_ENV
         echo "AWS_SECRET_ACCESS_KEY=${SECRET_KEY}" >> $GITHUB_ENV
 
-    - name: Configure AWS credentials
-      run: 
-        mkdir ~/.aws
-        echo "[default]" > ~/.aws/credentials
-        echo "aws_access_key_id=${ACCESS_KEY}" >> ~/.aws/credentials
-        echo "aws_secret_access_key=${SECRET_KEY}" >> ~/.aws/credentials
+    
 
-   
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+        aws-region: ap-south-1
 
     - name: Log in to Amazon ECR
         
