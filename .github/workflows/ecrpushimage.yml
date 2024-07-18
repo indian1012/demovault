@@ -33,7 +33,7 @@ jobs:
         VAULT_ROLE: ${{ secrets.VAULT_ROLE }}
       run: |
         echo "Fetching JWT token from GitHub Actions"
-        export JWT=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "https://vstoken.actions.githubusercontent.com/.well-known/openid-configuration")
+        export JWT=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "https://token.actions.githubusercontent.com")
         
         echo "Logging into Vault using OIDC"
         VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="$VAULT_ROLE" jwt="$JWT")
