@@ -10,27 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Vault
-     run: |
-       curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-       sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-       sudo apt-get update && sudo apt-get install vault
+      - name: Install Vault
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install vault
 
-    - name: Authenticate with Vault using OIDC
-      id: vault_auth
-      env:
-        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-        GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-      run: |
-        VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="github" jwt="$GITHUB_TOKEN")
-        echo "::set-output name=vault_token::$VAULT_LOGIN"
+      - name: Authenticate with Vault using OIDC
+        id: vault_auth
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="github" jwt="$GIT_TOKEN")
+          echo "::set-output name=vault_token::$VAULT_LOGIN"
 
-    - name: Retrieve secret from Vault
-      env:
-        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-        VAULT_TOKEN: ${{ steps.vault_auth.outputs.vault_token }}
-      run: |
-        vault kv get -field=data secret/github/pat
+      - name: Retrieve secret from Vault
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ steps.vault_auth.outputs.vault_token }}
+        run: |
+          vault kv get -field=data secret/my-secret
