@@ -40,6 +40,14 @@ jobs:
         VAULT_LOGIN=$(vault write -field=token auth/oidc/login role="$VAULT_ROLE" jwt="$JWT")
         echo "vault_token=$VAULT_LOGIN" >> $GITHUB_ENV
 
+    - name: Debugging Output
+      run: |
+       echo "OIDC Configuration:"
+       vault read auth/oidc/config
+       echo "JWT Token:"
+       echo ${{ steps.get_jwt.outputs.jwt }}
+
+
     - name: Retrieve AWS credentials from Vault
       id: aws_creds
       env:
