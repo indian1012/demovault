@@ -1,4 +1,4 @@
-name: Deploy to ECR
+name: OIDC depoyed to ECR
 
 on:
   push:
